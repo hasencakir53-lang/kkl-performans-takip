@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KKL Performans Takip</title>
+<style>
+:root{
+  --bg:#f3f5f4;--card:#fff;--ink:#12292d;--mut:#5d7276;--line:#dde4e3;
+  --pri:#0e7c7b;--pri2:#0a5c5b;--deep:#0b2b2f;--amb:#e3a02d;--red:#c0432c;--ok:#1d8a5a;
+  --chip:#e8efee;--shadow:0 1px 2px rgba(11,43,47,.06),0 6px 20px rgba(11,43,47,.06);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0c1a1c;--card:#132528;--ink:#e7f0ef;--mut:#8fa9ac;--line:#244044;--chip:#1b3236;
+  --pri:#2bb3b0;--pri2:#5fd0cc;--deep:#071213;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.2}
+.num{font-variant-numeric:tabular-nums}
+/* login */
+.login{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr}
+.hero{background:radial-gradient(1200px 600px at 20% 10%,#14575a 0,var(--deep) 60%);color:#e8f4f3;padding:48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.hero .org{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8fc9c6}
+.hero h1{font-size:34px;font-weight:700;max-width:12em;margin-top:16px}
+.hero p{color:#a9cfcd;max-width:30em}
+.hero svg{width:min(420px,90%);margin:12px 0}
+.formwrap{display:flex;align-items:center;justify-content:center;padding:32px}
+.lcard{width:100%;max-width:400px}
+.lcard h2{font-size:24px;margin-bottom:4px}
+.lcard .sub{color:var(--mut);margin-bottom:20px}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--mut);margin:14px 0 5px;letter-spacing:.02em}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);outline:none}
+input:focus,select:focus{border-color:var(--pri);box-shadow:0 0 0 3px color-mix(in srgb,var(--pri) 22%,transparent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:11px 18px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{background:var(--pri2)}
+.btn.block{width:100%;margin-top:20px;padding:13px}
+.btn.ghost{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--chip)}
+.btn.danger{background:transparent;color:var(--red);border:1px solid var(--line)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:8px}
+.link{background:none;border:0;color:var(--pri);cursor:pointer;font-weight:600;padding:0}
+.err{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red);padding:10px 12px;border-radius:10px;margin-top:14px;font-size:14px}
+.note{color:var(--mut);font-size:13px}
+/* app shell */
+.top{background:var(--deep);color:#e8f4f3;position:sticky;top:0;z-index:20}
+.top .in{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.01em}
+.brand small{display:block;font-weight:500;color:#8fc9c6;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.sp{flex:1}
+.who{font-size:13px;text-align:right;line-height:1.3}
+.who b{display:block}
+.who span{color:#8fc9c6;font-size:12px}
+nav.tabs{max-width:1180px;margin:auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto}
+nav.tabs button{background:none;border:0;color:#9fc4c2;padding:11px 14px;cursor:pointer;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs button.on{color:#fff;border-color:var(--amb)}
+main{max-width:1180px;margin:auto;padding:22px 20px 80px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.g-hero{grid-template-columns:minmax(300px,420px) 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.card h3{font-size:15px;margin-bottom:12px}
+.kpi .v{font-size:22px;font-weight:700;white-space:nowrap}
+.kpi .l{color:var(--mut);font-size:12.5px;letter-spacing:.03em}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--mut)}
+.chip.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.chips input{width:auto;padding:6px 10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--mut);font-weight:600;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.r{text-align:right}
+.scroll{overflow-x:auto}
+.bar{height:8px;background:var(--chip);border-radius:6px;overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:var(--pri);border-radius:6px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.p-low{background:#fbecd0;color:#7a4e06}.p-mid{background:#d9eeed;color:#0a5c5b}.p-ok{background:#d5efe2;color:#176b46}.p-hi{background:#dfe6fb;color:#2a3f9d}
+@media (prefers-color-scheme:dark){.p-low{background:#4a3410;color:#f4cd85}.p-mid{background:#17403f;color:#8fe0dc}.p-ok{background:#154a33;color:#8fe3b8}.p-hi{background:#24305e;color:#b6c4ff}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.prev{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--chip);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.prev b{font-size:22px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--deep);color:#fff;padding:11px 18px;border-radius:12px;box-shadow:var(--shadow);z-index:99;font-weight:600}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+details summary{cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+.cat{border-collapse:separate;border-spacing:0}
+.cat th,.cat td{padding:4px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.cat th{white-space:normal;min-width:84px;font-size:11px;vertical-align:bottom;background:var(--card);position:sticky;top:0;z-index:2}
+.cat td:first-child,.cat th:first-child{position:sticky;left:0;background:var(--card);z-index:3;min-width:150px;font-weight:600}
+.cat input{width:64px;padding:5px 6px;text-align:right;border-radius:6px}
+.cat input.zero{background:var(--chip);color:var(--mut)}
+.cwrap{max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.section-title p{margin:5px 0 0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.form-grid .full{grid-column:1/-1}.metric-note{font-size:12px;color:var(--mut);margin-top:6px}.callout{border:1px solid color-mix(in srgb,var(--pri) 25%,var(--line));background:color-mix(in srgb,var(--pri) 7%,var(--card));padding:13px 15px;border-radius:12px;margin-bottom:16px}.table-small{font-size:13px}
+@media (max-width:860px){
+  .login{grid-template-columns:1fr}.hero{padding:28px 24px}.hero h1{font-size:26px}
+  .g2,.g3,.g4,.g-hero,.row2{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}
+  main{padding:16px 14px 80px}.who{display:none}
+}
+@media print{.top,.chips,.btn{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ============ AYARLAR (dosyayı Drive'a yüklemeden önce değiştirin) ============ */
+const CONFIG = {
+  KURUM: 'Sanovel İlaç · Kalite Kontrol Giriş Ambalaj Laboratuvarı',
+  VARSAYILAN_MESAI: 450          // Günlük net çalışma süresi (dk) = 7 sa 30 dk
+};
+const DEFAULT_CAT = {"ver": "excel-2027", "jobs": ["Primer Numuneleme", "Sekonder Numuneleme", "Primer Analiz", "Sekonder Analiz", "Kimyasal Analiz", "Global Vision Kontrolleri Basılı Malzeme", "Global Vision Kontrolleri Matbaa Öncesi", "Global Vision Kontrolleri Dizayn Hazırlık", "Primer Raporlama", "Sekonder Raporlama", "Kimyasal Test Raporlama", "Rapor Taratma ve Arşivleme", "Analiz Dokümanı Düzenleme/Yazımı", "Rapor Kontrolü", "Ret ve İmha İşlemleri", "Ambalaj Malzeme Defter Yazımı", "Farmakod Liste Güncellemeleri", "Eğitim Faaliyetleri (Verme/Alma)", "Ruhsat, Başvuru ve Uluslararası Doküman Hazırlama", "Ön Çalışmalar ve Laboratuvar Hazırlığı", "Temizlik Form Yazımı", "Manage SDMS GV Qmex Sistem Kontrolü", "Rapor ve Dizayn Yerleştirme", "Rapor Arşivine Doküman Ekleme", "Arşiv Öncesi Klasörleme ve Dokümantasyon", "Kutu Gramaj Liste Güncellemeleri", "Bilgisayar veya Sistem arıza durumu"], "mats": ["Cam Flakon", "Cam Şişe", "Plastik şişe", "Folyo", "PVC, PVDC, Formpack", "Plastik kapak", "Flip-off kapak", "Pompa, Aktüatör, Halka", "Tüp", "Silikajel", "Kaşık, Ölçek, Enjektör, Pipet", "Seperator", "Kutu", "Kullanma talimatı", "Etiket", "Koli", "Tıpa"], "t": [[15, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15, 45, 30, 15], [10, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10], [15, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15, 30, 25, 15], [10, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10, 20, 20, 10], [10, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10, 30, 25, 10], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [15, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15, 40, 30, 15], [15, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15, 25, 20, 15], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [5, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [10, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10, 0, 20, 10], [10, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10, 0, 15, 10], [5, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5], [10, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10, 30, 20, 10]]};
+/* ================================================================================ */
+
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mem={};
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);if(v!=null)return JSON.parse(v)}catch(e){} return k in mem?mem[k]:d},
+  set(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const sess={
+  get(){try{return sessionStorage.getItem('kklp_sess')}catch(e){return mem.__s||null}},
+  set(v){mem.__s=v;try{v?sessionStorage.setItem('kklp_sess',v):sessionStorage.removeItem('kklp_sess')}catch(e){}}
+};
+
+/* ---------- SHA-256 (saf JS, her ortamda aynı sonucu verir) ---------- */
+const SHA=(()=>{
+  const K=[],H0=[];let n=2,c=0;
+  const frac=x=>Math.floor((x-Math.floor(x))*4294967296);
+  while(c<64){let p=true;for(let i=2;i*i<=n;i++)if(n%i===0){p=false;break}
+    if(p){if(c<8)H0.push(frac(Math.sqrt(n)));K.push(frac(Math.cbrt(n)));c++}n++}
+  const rr=(x,s)=>(x>>>s)|(x<<(32-s));
+  return function(str){
+    const b=new TextEncoder().encode(str),l=b.length,tl=((l+9+63)>>6)<<6,m=new Uint8Array(tl);
+    m.set(b);m[l]=0x80;const dv=new DataView(m.buffer);dv.setUint32(tl-4,l*8>>>0);dv.setUint32(tl-8,Math.floor(l*8/4294967296));
+    const h=H0.slice(),w=new Array(64);
+    for(let o=0;o<tl;o+=64){
+      for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);
+      for(let i=16;i<64;i++){const s0=rr(w[i-15],7)^rr(w[i-15],18)^(w[i-15]>>>3),s1=rr(w[i-2],17)^rr(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
+      let [a,b2,c2,d,e,f,g,hh]=h;
+      for(let i=0;i<64;i++){
+        const S1=rr(e,6)^rr(e,11)^rr(e,25),ch=(e&f)^(~e&g),t1=(hh+S1+ch+K[i]+w[i])|0;
+        const S0=rr(a,2)^rr(a,13)^rr(a,22),mj=(a&b2)^(a&c2)^(b2&c2),t2=(S0+mj)|0;
+        hh=g;g=f;f=e;e=(d+t1)|0;d=c2;c2=b2;b2=a;a=(t1+t2)|0;
+      }
+      h[0]=(h[0]+a)|0;h[1]=(h[1]+b2)|0;h[2]=(h[2]+c2)|0;h[3]=(h[3]+d)|0;h[4]=(h[4]+e)|0;h[5]=(h[5]+f)|0;h[6]=(h[6]+g)|0;h[7]=(h[7]+hh)|0;
+    }
+    return h.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
+  };
+})();
+function hashPw(pw,salt){let h=SHA(salt+':'+pw);for(let i=0;i<4000;i++)h=SHA(h+salt+pw);return h}
+const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+
+/* ---------- Tarih / biçim ---------- */
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const trDate=s=>{const [y,m,d]=s.split('-');return d+'.'+m+'.'+y};
+function range(p){
+  const n=new Date(),t=ymd(n);
+  if(p==='bugun')return[t,t];
+  if(p==='hafta'){const d=new Date(n);d.setDate(d.getDate()-((d.getDay()+6)%7));return[ymd(d),t]}
+  if(p==='ay')return[ymd(new Date(n.getFullYear(),n.getMonth(),1)),t];
+  if(p==='yil')return[n.getFullYear()+'-01-01',t];
+  return[S.from||t,S.to||t];
+}
+const hm=m=>{m=Math.round(m);const h=Math.floor(m/60);return(h?h+' sa ':'')+(m%60)+' dk'};
+const pf=x=>x.toLocaleString('tr-TR',{maximumFractionDigits:1});
+
+/* ---------- Veri ---------- */
+const getUsers=()=>store.get('kklp_users',[]);
+const getCat=()=>store.get('kklp_cat',null)||DEFAULT_CAT;
+const getSet=()=>Object.assign({mesai:CONFIG.VARSAYILAN_MESAI},store.get('kklp_set',{}));
+const getRec=u=>store.get('kklp_rec_'+u,[]);
+const setRec=(u,r)=>store.set('kklp_rec_'+u,r);
+const getTeam=()=>store.get('kklp_team',{});
+
+const S={user:null,tab:'panel',period:'bugun',from:'',to:'',tperiod:'ay',tfrom:'',tto:'',
+  draft:{date:today(),job:'',mat:'',qty:'1',note:'',actualMin:'',waitMin:'0',waitReason:'',status:'Tamamlandı',quality:'Uygun',rework:'Hayır',priority:'Normal',dueDate:''},edit:null,mode:'login',err:'',catDraft:null,fails:0,lock:0};
+
+/* ---------- Performans hesabı ---------- */
+function stats(recs,mesai){
+  const days=new Set(),byJob={},byMat={};let total=0,actual=0,actualN=0,wait=0,completed=0,open=0,good=0,qualityN=0,rework=0,late=0;
+  recs.forEach(r=>{
+    days.add(r.date);total+=Number(r.total)||0;byJob[r.job]=(byJob[r.job]||0)+(Number(r.total)||0);byMat[r.mat]=(byMat[r.mat]||0)+(Number(r.total)||0);
+    if(r.actualMin!==''&&r.actualMin!=null&&Number(r.actualMin)>=0){actual+=Number(r.actualMin);actualN++}
+    wait+=Number(r.waitMin)||0;
+    if((r.status||'Tamamlandı')==='Tamamlandı')completed++;else open++;
+    if(r.quality){qualityN++;if(r.quality==='Uygun')good++}
+    if(r.rework==='Evet')rework++;
+    if(r.dueDate&&r.date>r.dueDate&&(r.status||'Tamamlandı')==='Tamamlandı')late++;
+  });
+  const avail=days.size*mesai;
+  return{total,days:days.size,avail,pct:avail?total/avail*100:0,n:recs.length,byJob,byMat,actual,actualN,wait,completed,open,good,qualityN,rework,late,firstPassPct:qualityN?good/qualityN*100:0,reworkPct:recs.length?rework/recs.length*100:0,actualVsStd:actual?total/actual*100:0};
+}
+function level(p){
+  if(p<70)return['Gelişime açık','p-low'];
+  if(p<90)return['Hedefe yakın','p-mid'];
+  if(p<=110)return['Hedefte','p-ok'];
+  return['Hedef üstü','p-hi'];
+}
+
+/* ---------- SVG: kadran (laboratuvar ölçü aleti metaforu) ---------- */
+function gauge(pct,opt={}){
+  const W=opt.w||320,cx=W/2,cy=W*0.56,r=W*0.40,max=120;
+  const pt=(a,rad)=>[cx+rad*Math.cos(a*Math.PI/180),cy-rad*Math.sin(a*Math.PI/180)];
+  const ang=v=>180-Math.min(Math.max(v,0),max)/max*180;
+  const arc=(v0,v1,rad,col,sw)=>{const[a0x,a0y]=pt(ang(v0),rad),[a1x,a1y]=pt(ang(v1),rad);
+    return`<path d="M${a0x} ${a0y} A${rad} ${rad} 0 0 1 ${a1x} ${a1y}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="butt"/>`};
+  let s=`<svg viewBox="0 0 ${W} ${cy+W*0.2}" role="img" aria-label="Verimlilik ${pf(pct)} yüzde" style="width:100%;max-width:${W}px;display:block;margin:auto">`;
+  s+=arc(0,70,r,'#e3a02d',16)+arc(70,90,r,'#7fc4c1',16)+arc(90,110,r,'#1d8a5a',16)+arc(110,120,r,'#4a63d4',16);
+  for(let v=0;v<=120;v+=10){const[x1,y1]=pt(ang(v),r-14),[x2,y2]=pt(ang(v),r-(v%30===0?28:22));
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-opacity=".55" stroke-width="${v%30===0?2:1}"/>`;
+    if(v%30===0){const[tx,ty]=pt(ang(v),r-42);s+=`<text x="${tx}" y="${ty+4}" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity=".6">${v}</text>`}}
+  const a=ang(pct),[nx,ny]=pt(a,r-18);
+  s+=`<g class="needle"><line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#12292d" stroke-width="3.5" stroke-linecap="round" style="stroke:var(--ink)"/><circle cx="${cx}" cy="${cy}" r="9" fill="var(--ink)"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--amb)"/></g>`;
+  s+=`<text x="${cx}" y="${cy+44}" text-anchor="middle" font-size="${W*0.12}" font-weight="700" fill="currentColor" class="num">%${pf(pct)}</text>`;
+  s+=`</svg>`;return s;
+}
+function barChart(data,target,h=170){
+  if(!data.length)return'<div class="empty">Seçilen dönemde kayıt yok.</div>';
+  const W=560,pl=36,pb=26,pt=14,max=Math.max(target*1.25,...data.map(d=>d.v)),bw=Math.min(28,(W-pl)/data.length*0.65);
+  const y=v=>pt+(h-pt-pb)*(1-v/max),step=(W-pl)/data.length;
+  let s=`<svg viewBox="0 0 ${W} ${h}" style="width:100%;height:auto" role="img" aria-label="Günlük standart süre grafiği">`;
+  s+=`<line x1="${pl}" x2="${W}" y1="${y(target)}" y2="${y(target)}" stroke="#e3a02d" stroke-dasharray="5 4" stroke-width="1.6"/><text x="${pl-4}" y="${y(target)+4}" text-anchor="end" font-size="10" fill="#e3a02d">hedef</text>`;
+  s+=`<line x1="${pl}" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="currentColor" stroke-opacity=".25"/>`;
+  data.forEach((d,i)=>{const x=pl+i*step+(step-bw)/2;
+    s+=`<rect x="${x}" y="${y(d.v)}" width="${bw}" height="${y(0)-y(d.v)}" rx="4" fill="${d.v>=target*0.9?'#0e7c7b':'#7fc4c1'}"><title>${esc(trDate(d.d))}: ${hm(d.v)}</title></rect>`;
+    if(data.length<=16||i%2===0)s+=`<text x="${x+bw/2}" y="${h-8}" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity=".6">${d.d.slice(8)}.${d.d.slice(5,7)}</text>`});
+  return s+'</svg>';
+}
+function hbars(obj,limit=8){
+  const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,limit);
+  if(!e.length)return'<div class="empty">Kayıt yok.</div>';
+  const mx=e[0][1];
+  return e.map(([k,v])=>`<div style="margin:9px 0"><div style="display:flex;justify-content:space-between;gap:10px;font-size:13.5px"><span>${esc(k)}</span><b class="num">${hm(v)}</b></div><div class="bar"><i style="width:${v/mx*100}%"></i></div></div>`).join('');
+}
+const logo=`<svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="1" y="1" width="30" height="30" rx="9" fill="#0e7c7b"/><path d="M7 21a9 9 0 0 1 18 0" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M16 21l5-7" stroke="#e3a02d" stroke-width="2.6" stroke-linecap="round"/><circle cx="16" cy="21" r="2" fill="#fff"/></svg>`;
+
+/* ---------- Giriş / kayıt ---------- */
+function viewLogin(){
+  const reg=S.mode==='reg',first=getUsers().length===0;
+  return`<div class="login">
+  <section class="hero">
+    <div><div class="org">${esc(CONFIG.KURUM)}</div><h1>Ölçülen iş, görünen emek.</h1></div>
+    <div>${gauge(92,{w:420}).replace('color:','')}</div>
+    <p>Her numune, her rapor, her kontrol standart süresiyle ölçülür; günlük emeğiniz tek bir kadranda görünür.</p>
+  </section>
+  <section class="formwrap"><form class="lcard" data-form="${reg?'reg':'login'}" autocomplete="off">
+    <div style="margin-bottom:18px">${logo}</div>
+    <h2>${reg?'Hesap oluştur':'Giriş yap'}</h2>
+    <div class="sub">${reg?'Bilgilerinizi girin; hesap bu cihazda saklanır.':(first?'Henüz hesap yok. Önce hesap oluşturun.':'KKL Performans Takip sistemine hoş geldiniz.')}</div>
+    ${reg?`<label>Ad Soyad</label><input name="name" required maxlength="60">`:''}
+    <label>Kullanıcı adı</label><input name="username" required maxlength="30" autocapitalize="none" value="${esc(S.lu||'')}">
+    <label>Şifre ${reg?'(en az 6 karakter)':''}</label><input name="pw" type="password" required ${reg?'minlength="6"':''}>
+    ${reg?`<label>Şifre (tekrar)</label><input name="pw2" type="password" required>
+    <label>Rol</label><select name="role"><option value="personel">Personel</option><option value="yonetici">Yönetici</option></select>`:''}
+    ${S.err?`<div class="err" role="alert">${esc(S.err)}</div>`:''}
+    <button class="btn block" type="submit">${reg?'Hesabı oluştur':'Giriş yap'}</button>
+    <p class="note" style="text-align:center;margin-top:16px">${reg?'Hesabınız var mı? <button type="button" class="link" data-act="mode" data-v="login">Giriş yap</button>':'Hesabınız yok mu? <button type="button" class="link" data-act="mode" data-v="reg">Hesap oluştur</button>'}</p>
+  </form></section></div>`;
+}
+function doLogin(f){
+  const now=Date.now();
+  if(S.lock>now){S.err=`Çok fazla hatalı deneme. ${Math.ceil((S.lock-now)/1000)} sn bekleyin.`;return render()}
+  const un=f.username.value.trim().toLowerCase();S.lu=un;const u=getUsers().find(x=>x.username===un);
+  if(!u||hashPw(f.pw.value,u.salt)!==u.hash){
+    S.fails++;if(S.fails>=5){S.lock=now+30000;S.fails=0}
+    S.err='Kullanıcı adı veya şifre hatalı.';return render();
+  }
+  S.fails=0;S.err='';S.user=u;sess.set(u.username);S.tab='panel';render();
+}
+function doReg(f){
+  const name=f.name.value.trim(),un=f.username.value.trim().toLowerCase(),pw=f.pw.value,role=f.role.value;
+  if(!/^[a-z0-9._-]{3,30}$/.test(un))return err('Kullanıcı adı 3-30 karakter olmalı (harf, rakam, . _ -).');
+  if(pw.length<6)return err('Şifre en az 6 karakter olmalı.');
+  if(pw!==f.pw2.value)return err('Şifreler eşleşmiyor.');
+  if(getUsers().some(x=>x.username===un))return err('Bu kullanıcı adı zaten kayıtlı.');
+  const salt=rid(),u={id:rid(),username:un,name,role,salt,hash:hashPw(pw,salt)};
+  store.set('kklp_users',[...getUsers(),u]);
+  S.user=u;sess.set(un);S.err='';S.tab='panel';render();
+  function err(m){S.lu=un;S.err=m;render()}
+}
+
+/* ---------- Uygulama iskeleti ---------- */
+function viewApp(){
+  const adm=S.user.role==='yonetici';
+  const tabs=[['panel','Genel Bakış'],['ekle','İş Kaydı Ekle'],['kayit','Kayıtlarım']];
+  if(adm)tabs.push(['ekip','Ekip Yönetimi'],['rapor','Analiz ve Raporlar'],['katalog','Süre Kataloğu']);
+  tabs.push(['ayar','Ayarlar']);
+  let body='';
+  if(S.tab==='panel')body=viewPanel();else if(S.tab==='ekle')body=viewAdd();else if(S.tab==='kayit')body=viewRecs();
+  else if(S.tab==='ekip'&&adm)body=viewTeam();else if(S.tab==='rapor'&&adm)body=viewReports();else if(S.tab==='katalog'&&adm)body=viewCat();else body=viewSettings();
+  return`<header class="top"><div class="in"><div class="brand">${logo}<div>KKL Performans<small>Giriş Ambalaj</small></div></div><div class="sp"></div>
+  <div class="who"><b>${esc(S.user.name)}</b><span>${adm?'Yönetici':'Personel'}</span></div>
+  <button class="btn ghost sm" style="color:#e8f4f3;border-color:#2c5a5e" data-act="logout">Çıkış</button></div>
+  <nav class="tabs">${tabs.map(t=>`<button class="${S.tab===t[0]?'on':''}" data-act="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</nav></header>
+  <main>${body}</main>`;
+}
+function periodChips(key){
+  const p=key==='t'?S.tperiod:S.period,f=key==='t'?S.tfrom:S.from,t=key==='t'?S.tto:S.to;
+  const items=[['bugun','Bugün'],['hafta','Bu hafta'],['ay','Bu ay'],['yil','Bu yıl'],['ozel','Özel']];
+  return`<div class="chips">${items.map(i=>`<button class="chip ${p===i[0]?'on':''}" data-act="${key}period" data-v="${i[0]}">${i[1]}</button>`).join('')}
+  ${p==='ozel'?`<input type="date" value="${f||today()}" data-act="${key}from"><span class="note">–</span><input type="date" value="${t||today()}" data-act="${key}to">`:''}</div>`;
+}
+function myRecsIn(r){return getRec(S.user.username).filter(x=>x.date>=r[0]&&x.date<=r[1])}
+
+function viewPanel(){
+  const r=range(S.period),recs=myRecsIn(r),mesai=getSet().mesai,st=stats(recs,mesai),[lv,cls]=level(st.pct);
+  const per={};recs.forEach(x=>per[x.date]=(per[x.date]||0)+x.total);
+  const days=Object.keys(per).sort().slice(-30).map(d=>({d,v:per[d]}));
+  return`${periodChips('')}
+  <div class="grid g-hero">
+    <div class="card" style="text-align:center"><h3 style="text-align:left">Verimlilik göstergesi</h3>${gauge(st.pct)}
+      <div style="margin-top:6px"><span class="pill ${cls}">${lv}</span></div>
+      <p class="note" style="margin:10px 0 0">${trDate(r[0])}${r[0]!==r[1]?' – '+trDate(r[1]):''}</p></div>
+    <div class="grid" style="align-content:start">
+      <div class="grid g4">
+        <div class="card kpi"><div class="v num">${hm(st.total)}</div><div class="l">Standart süre toplamı</div></div>
+        <div class="card kpi"><div class="v num">${st.days}</div><div class="l">Kayıt girilen gün</div></div>
+        <div class="card kpi"><div class="v num">${hm(st.avail)}</div><div class="l">Net mesai (${st.days} × ${mesai} dk)</div></div>
+        <div class="card kpi"><div class="v num">${st.n}</div><div class="l">İş kaydı</div></div>
+      </div>
+      <div class="card"><h3>Günlük standart süre</h3>${barChart(days,mesai)}</div>
+    </div>
+  </div>
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card kpi"><div class="v num">${st.completed}</div><div class="l">Tamamlanan kayıt</div></div>
+    <div class="card kpi"><div class="v num">${st.open}</div><div class="l">Devam eden / bekleyen</div></div>
+    <div class="card kpi"><div class="v num">${st.qualityN?'%'+pf(st.firstPassPct):'—'}</div><div class="l">Uygun sonuç oranı</div></div>
+    <div class="card kpi"><div class="v num">${st.rework}</div><div class="l">Tekrar işlem kaydı</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px"><div class="card"><h3>İş grubuna göre iş yükü</h3>${hbars(st.byJob,10)}</div><div class="card"><h3>Malzeme grubuna göre iş yükü</h3>${hbars(st.byMat,10)}</div></div>
+  <div class="callout" style="margin-top:16px"><b>Göstergeyi doğru yorumlayın</b><div class="note">Standart süre karşılama oranı tek başına personel performansı değildir. İşin karmaşıklığı, bekleme, eğitim, sistem arızası ve ek sorumluluklar ayrıca değerlendirilmelidir. Uygunluk oranı yalnızca kalite sonucu girilmiş kayıtlar üzerinden hesaplanır.</div></div>
+  <p class="note" style="margin-top:14px">Standart süre karşılama oranı = kayıtlı işlerin standart süre toplamı ÷ (kayıt girilen gün sayısı × günlük net mesai). Başlangıç hedef bandı %90–110'dur; gerçek iş verileriyle kalibre edilmelidir.</p>`;
+}
+
+/* ---------- Kayıt ekle ---------- */
+function stdOf(job,mat){const c=getCat(),j=c.jobs.indexOf(job),m=c.mats.indexOf(mat);return j<0||m<0?null:c.t[m][j]}
+function viewAdd(){
+  const c=getCat(),d=S.draft,e=S.edit?getRec(S.user.username).find(x=>x.id===S.edit):null;
+  const todays=getRec(S.user.username).filter(x=>x.date===d.date),st=stats(todays,getSet().mesai);
+  return`<div class="grid g2"><form class="card" data-form="add"><h3>${e?'Kaydı düzenle':'Yeni iş kaydı'}</h3>
+    <label>Tarih</label><input type="date" name="date" value="${esc(d.date)}" max="${today()}" required data-draft>
+    <label>Yapılan iş grubu</label><select name="job" required data-draft><option value="">Seçiniz…</option>${c.jobs.map(j=>`<option ${j===d.job?'selected':''}>${esc(j)}</option>`).join('')}</select>
+    <div class="row2"><div><label>Malzeme grubu</label><select name="mat" required data-draft><option value="">Seçiniz…</option>${c.mats.map(j=>`<option ${j===d.mat?'selected':''}>${esc(j)}</option>`).join('')}</select></div>
+    <div><label>Miktar (adet / işlem)</label><input type="number" name="qty" min="1" max="9999" step="1" value="${esc(d.qty)}" required data-draft></div></div>
+    <div class="form-grid">
+      <div><label>İş durumu</label><select name="status" data-draft>${['Tamamlandı','Devam ediyor','Beklemede'].map(x=>`<option ${x===(d.status||'Tamamlandı')?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label>Öncelik</label><select name="priority" data-draft>${['Normal','Yüksek','Kritik'].map(x=>`<option ${x===(d.priority||'Normal')?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label>Gerçek çalışma süresi (dk) · isteğe bağlı</label><input type="number" name="actualMin" min="0" max="100000" step="1" value="${esc(d.actualMin??'')}" placeholder="Bilinmiyorsa boş bırak" data-draft></div>
+      <div><label>Bekleme süresi (dk)</label><input type="number" name="waitMin" min="0" max="100000" step="1" value="${esc(d.waitMin??'0')}" data-draft></div>
+      <div><label>Kalite sonucu</label><select name="quality" data-draft>${['Değerlendirilmedi','Uygun','Uygunsuz','Düzeltme gerekli'].map(x=>`<option ${x===(d.quality||'Uygun')?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label>Tekrar işlem / yeniden kontrol</label><select name="rework" data-draft>${['Hayır','Evet'].map(x=>`<option ${x===(d.rework||'Hayır')?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label>Bekleme nedeni</label><select name="waitReason" data-draft>${['Yok','Malzeme / numune bekleme','Diğer bölümden bilgi/onay','Cihaz / ekipman','IT / sistem arızası','Öncelik değişikliği / iş kesintisi','Planlama / iş dağılımı','Diğer'].map(x=>`<option ${x===(d.waitReason||'Yok')?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label>Hedef tamamlanma tarihi · isteğe bağlı</label><input type="date" name="dueDate" value="${esc(d.dueDate||'')}" data-draft></div>
+      <div class="full"><label>Not / açıklama (isteğe bağlı)</label><input name="note" maxlength="500" value="${esc(d.note)}" data-draft></div>
+    </div>
+    <div class="prev"><div><div class="note">Hesaplanan standart süre</div><b class="num" id="pv">–</b></div><div class="note" id="pvn" style="text-align:right"></div></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" type="submit">${e?'Güncelle':'Kaydı ekle'}</button>${e?'<button type="button" class="btn ghost" data-act="canceledit">Vazgeç</button>':''}</div>
+  </form>
+  <div class="card" style="text-align:center"><h3 style="text-align:left">${trDate(d.date)} günü</h3>${gauge(st.pct,{w:260})}
+    <p class="num" style="margin:4px 0 0"><b>${hm(st.total)}</b> / ${getSet().mesai} dk · ${st.n} kayıt</p></div></div>`;
+}
+function updPreview(){
+  const d=S.draft,pv=$('#pv'),pn=$('#pvn');if(!pv)return;
+  const s=stdOf(d.job,d.mat),q=parseFloat(d.qty);
+  if(!d.job||!d.mat){pv.textContent='–';pn.textContent='İş ve malzeme seçin';return}
+  if(!s){pv.textContent='Tanımsız';pn.textContent='Bu iş/malzeme kombinasyonu için standart süre 0 — katalogda tanımlı değil.';return}
+  pv.textContent=hm(s*(q||0));pn.textContent=`${s} dk × ${q||0} adet`;
+}
+function doAdd(f){
+  const d=S.draft,s=stdOf(d.job,d.mat),q=parseFloat(d.qty);
+  if(!s){toast('Bu kombinasyon için standart süre tanımlı değil.');return}
+  if(!(q>=1)){toast('Adet en az 1 olmalı.');return}
+  const recs=getRec(S.user.username);
+  const rec={id:S.edit||rid(),u:S.user.username,date:d.date,job:d.job,mat:d.mat,qty:q,std:s,total:s*q,note:d.note.trim(),actualMin:d.actualMin===''?'':Math.max(0,Number(d.actualMin)||0),waitMin:Math.max(0,Number(d.waitMin)||0),waitReason:d.waitReason||'Yok',status:d.status||'Tamamlandı',quality:d.quality||'Değerlendirilmedi',rework:d.rework||'Hayır',priority:d.priority||'Normal',dueDate:d.dueDate||'',ts:Date.now()};
+  const i=recs.findIndex(x=>x.id===rec.id);if(i>=0)recs[i]=rec;else recs.push(rec);
+  setRec(S.user.username,recs);
+  const wasEdit=!!S.edit;S.edit=null;S.draft={date:today(),job:'',mat:'',qty:'1',note:'',actualMin:'',waitMin:'0',waitReason:'Yok',status:'Tamamlandı',quality:'Uygun',rework:'Hayır',priority:'Normal',dueDate:''};
+  render();toast(wasEdit?'Kayıt güncellendi.':'Kayıt eklendi: '+hm(rec.total));
+}
+
+/* ---------- Kayıtlarım ---------- */
+function viewRecs(){
+  const r=range(S.period),recs=myRecsIn(r).sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts),tot=recs.reduce((a,x)=>a+x.total,0);
+  return`${periodChips('')}<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px"><h3 style="margin:0">Kayıtlarım · <span class="num">${recs.length}</span> kayıt · <span class="num">${hm(tot)}</span></h3>
+  <button class="btn ghost sm" data-act="csv">Excel için indir (CSV)</button></div>
+  ${recs.length?`<div class="scroll"><table><thead><tr><th>Tarih</th><th>İş grubu</th><th>Malzeme</th><th class="r">Adet</th><th class="r">Standart</th><th class="r">Gerçek dk</th><th>Durum</th><th>Kalite</th><th>Not</th><th></th></tr></thead><tbody>
+  ${recs.map(x=>`<tr><td class="num">${trDate(x.date)}</td><td>${esc(x.job)}</td><td>${esc(x.mat)}</td><td class="r num">${x.qty}</td><td class="r num">${hm(x.total)}</td><td class="r num">${x.actualMin===''||x.actualMin==null?'—':hm(x.actualMin)}</td><td><span class="pill ${x.status==='Tamamlandı'?'p-ok':x.status==='Beklemede'?'p-low':'p-mid'}">${esc(x.status||'Tamamlandı')}</span></td><td>${esc(x.quality||'—')}${x.rework==='Evet'?' · Tekrar':''}</td><td class="note">${esc(x.note)}</td>
+  <td style="white-space:nowrap"><button class="btn ghost sm" data-act="edit" data-v="${esc(x.id)}">Düzenle</button> <button class="btn danger sm" data-act="del" data-v="${esc(x.id)}">Sil</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Bu dönemde kayıt yok. “Kayıt Ekle” sekmesinden başlayın.</div>'}</div>`;
+}
+
+/* ---------- Ekip (yönetici) ---------- */
+function teamData(){
+  const users=getUsers(),team=getTeam(),map={};
+  users.forEach(u=>map[u.username]={name:u.name,recs:{}, src:'Bu cihaz'});
+  users.forEach(u=>getRec(u.username).forEach(r=>map[u.username].recs[r.id]=r));
+  Object.entries(team).forEach(([k,v])=>{map[k]=map[k]||{name:v.name,recs:{},src:'İçe aktarılan'};Object.assign(map[k].recs,v.recs);if(map[k].src==='Bu cihaz')map[k].src='Bu cihaz + içe aktarılan'});
+  return map;
+}
+function viewTeam(){
+  const r=range(S.tperiod).map(x=>x),m=teamData(),mesai=getSet().mesai;
+  const rows=Object.entries(m).map(([k,v])=>{const recs=Object.values(v.recs).filter(x=>x.date>=r[0]&&x.date<=r[1]);return{k,name:v.name,src:v.src,st:stats(recs,mesai)}}).sort((a,b)=>b.st.pct-a.st.pct);
+  const withData=rows.filter(x=>x.st.n),avg=withData.length?withData.reduce((a,x)=>a+x.st.pct,0)/withData.length:0;
+  const allJob={};withData.forEach(x=>Object.entries(x.st.byJob).forEach(([j,v])=>allJob[j]=(allJob[j]||0)+v));
+  return`${periodChips('t')}
+  <div class="grid g-hero"><div class="card" style="text-align:center"><h3 style="text-align:left">Ekip ortalaması</h3>${gauge(avg)}<p class="note">${withData.length} personel · kişi başı ortalama</p></div>
+  <div class="card"><h3>Ekip iş yükü dağılımı</h3>${hbars(allJob,8)}</div></div>
+  <div class="card" style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px"><h3 style="margin:0">Personel sıralaması</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><label class="btn ghost sm" style="margin:0;cursor:pointer">Personel dosyası al (.json)<input type="file" accept=".json,application/json" multiple hidden data-act="import"></label>
+    <button class="btn ghost sm" data-act="teamcsv">Ekip CSV</button></div></div>
+  ${rows.length?`<div class="scroll"><table><thead><tr><th>Personel</th><th class="r">Kayıt</th><th class="r">Gün</th><th class="r">Standart süre</th><th class="r">Gerçek süre</th><th class="r">Bekleme</th><th class="r">Bekleyen</th><th class="r">Tekrar</th><th style="min-width:130px">Standart karşılama</th><th>Durum</th></tr></thead><tbody>
+  ${rows.map(x=>{const[l,c]=level(x.st.pct);return`<tr><td><details><summary><b>${esc(x.name)}</b> <span class="note">@${esc(x.k)} · ${esc(x.src)}</span></summary>
+    <div style="margin-top:8px;max-width:420px">${hbars(x.st.byJob,6)}</div></details></td>
+    <td class="r num">${x.st.n}</td><td class="r num">${x.st.days}</td><td class="r num">${hm(x.st.total)}</td><td class="r num">${x.st.actualN?hm(x.st.actual):'—'}</td><td class="r num">${hm(x.st.wait)}</td><td class="r num">${x.st.open}</td><td class="r num">${x.st.rework}</td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:${Math.min(x.st.pct,120)/1.2}%"></i></div><b class="num">%${pf(x.st.pct)}</b></div></td>
+    <td>${x.st.n?`<span class="pill ${c}">${l}</span>`:'<span class="note">Kayıt yok</span>'}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Henüz personel yok. Personelden gelen .json dosyalarını “Personel dosyası al” ile yükleyin.</div>'}</div>`;
+}
+
+/* ---------- Analiz ve raporlar (yönetici) ---------- */
+function viewReports(){
+  const r=range(S.tperiod),team=teamData(),rows=[];
+  Object.entries(team).forEach(([k,p])=>Object.values(p.recs).filter(x=>x.date>=r[0]&&x.date<=r[1]).forEach(x=>rows.push({...x,person:p.name,username:k})));
+  const st=stats(rows,getSet().mesai),job={},mat={},status={},waitReasons={},quality={};
+  rows.forEach(x=>{job[x.job]=(job[x.job]||0)+(Number(x.total)||0);mat[x.mat]=(mat[x.mat]||0)+(Number(x.total)||0);const ss=x.status||'Tamamlandı';status[ss]=(status[ss]||0)+1;const wr=x.waitReason||'Yok';if((Number(x.waitMin)||0)>0)waitReasons[wr]=(waitReasons[wr]||0)+(Number(x.waitMin)||0);const q=x.quality||'Değerlendirilmedi';quality[q]=(quality[q]||0)+1});
+  return `${periodChips('t')}<div class="section-title"><div><h2>Analiz ve Raporlar</h2><p class="note">Seçilen dönem: ${trDate(r[0])} – ${trDate(r[1])}. Raporlar bu cihazdaki ve içe aktarılan personel kayıtlarına dayanır.</p></div><button class="btn" data-act="reportcsv">Detaylı raporu CSV indir</button></div>
+  <div class="grid g4"><div class="card kpi"><div class="v num">${rows.length}</div><div class="l">Toplam iş kaydı</div></div><div class="card kpi"><div class="v num">${hm(st.total)}</div><div class="l">Standart iş yükü</div></div><div class="card kpi"><div class="v num">${st.actualN?hm(st.actual):'—'}</div><div class="l">Kaydedilen gerçek süre</div></div><div class="card kpi"><div class="v num">${hm(st.wait)}</div><div class="l">Kaydedilen bekleme</div></div></div>
+  <div class="grid g4" style="margin-top:12px"><div class="card kpi"><div class="v num">${st.open}</div><div class="l">Açık / bekleyen kayıt</div></div><div class="card kpi"><div class="v num">${st.qualityN?'%'+pf(st.firstPassPct):'—'}</div><div class="l">Uygun kalite sonucu</div></div><div class="card kpi"><div class="v num">${st.rework}</div><div class="l">Tekrar işlem</div></div><div class="card kpi"><div class="v num">${st.late}</div><div class="l">Hedef tarih aşımı (ön kayıt)</div></div></div>
+  <div class="grid g2" style="margin-top:16px"><div class="card"><h3>İş grubu yükü (standart süre)</h3>${hbars(job,12)}</div><div class="card"><h3>Malzeme grubu yükü (standart süre)</h3>${hbars(mat,12)}</div><div class="card"><h3>İş durumu</h3>${hbars(Object.fromEntries(Object.entries(status).map(([k,v])=>[k,v])),8)}</div><div class="card"><h3>Bekleme nedenleri (dakika)</h3>${hbars(waitReasons,8)}</div></div>
+  <div class="card" style="margin-top:16px"><h3>Personel bazında özet</h3>${Object.keys(team).length?`<div class="scroll"><table class="table-small"><thead><tr><th>Personel</th><th class="r">Kayıt</th><th class="r">Standart</th><th class="r">Gerçek süre</th><th class="r">Bekleme</th><th class="r">Açık iş</th><th class="r">Tekrar</th><th class="r">Uygun sonuç</th></tr></thead><tbody>${Object.entries(team).map(([k,p])=>{const pr=Object.values(p.recs).filter(x=>x.date>=r[0]&&x.date<=r[1]),ps=stats(pr,getSet().mesai);return `<tr><td>${esc(p.name)}</td><td class="r">${ps.n}</td><td class="r">${hm(ps.total)}</td><td class="r">${ps.actualN?hm(ps.actual):'—'}</td><td class="r">${hm(ps.wait)}</td><td class="r">${ps.open}</td><td class="r">${ps.rework}</td><td class="r">${ps.qualityN?'%'+pf(ps.firstPassPct):'—'}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Bu dönemde personel kaydı yok.</div>'}</div>
+  <div class="card" style="margin-top:16px"><h3>Kalite sonucu dağılımı</h3>${hbars(quality,8)}<p class="metric-note">“Değerlendirilmedi” kayıtları kalite oranının paydasına dahil edilmez. Malzeme uygunsuzluğu tespiti, tek başına personel hatası olarak yorumlanmamalıdır.</p></div>
+  <div class="card" style="margin-top:16px"><h3>Veri yorumu ve kapasite planlama</h3><p class="note">Standart süre toplamı, personelin yaptığı işin tahmini iş yükünü gösterir. Kapasite planlamasında iş sayısı kadar işin niteliği, bekleyen işler, gerçek süre girilen kayıtlar ve dönem içindeki izin/eğitim gibi çalışma dışı süreler de değerlendirilmelidir. Bu sürümde kayıtlar cihaz bazında tutulur; ekip raporunun eksiksiz olması için personel JSON yedeklerinin düzenli içe aktarılması gerekir.</p></div>`;
+}
+
+/* ---------- Süre kataloğu (yönetici) ---------- */
+function viewCat(){
+  const c=S.catDraft||(S.catDraft=JSON.parse(JSON.stringify(getCat())));
+  return`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+  <div><h3 style="margin:0">Standart süre kataloğu (dk/adet)</h3><p class="note" style="margin:4px 0 0">0 = o iş bu malzemede uygulanmaz. Değişiklik yalnızca yeni kayıtları etkiler; eski kayıtların süresi korunur.</p></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-act="addmat">+ Malzeme</button><button class="btn ghost sm" data-act="addjob">+ İş grubu</button>
+  <button class="btn ghost sm" data-act="catexp">Kataloğu dışa aktar</button><label class="btn ghost sm" style="margin:0;cursor:pointer">İçe aktar<input type="file" accept=".json" hidden data-act="catimp"></label>
+  <button class="btn sm" data-act="catsave">Kaydet</button></div></div>
+  <div class="cwrap"><table class="cat"><thead><tr><th>Malzeme</th>${c.jobs.map((j,ji)=>`<th>${esc(j)}<br><button class="link" style="font-size:10px;color:var(--red)" data-act="deljob" data-v="${ji}">sil</button></th>`).join('')}</tr></thead><tbody>
+  ${c.mats.map((m,mi)=>`<tr><td>${esc(m)} <button class="link" style="font-size:10px;color:var(--red)" data-act="delmat" data-v="${mi}">sil</button></td>${c.t[mi].map((v,ji)=>`<td><input type="number" min="0" step="1" value="${v}" class="${v==0?'zero':''}" data-cat="${mi}.${ji}"></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+/* ---------- Ayarlar ---------- */
+function viewSettings(){
+  const adm=S.user.role==='yonetici',set=getSet(),users=getUsers();
+  return`<div class="grid g2" style="align-items:start">
+  <div class="card"><h3>Verilerimi yedekle / paylaş</h3><p class="note">Kayıtlarınız bu cihazda tutulur. Yöneticiye iletmek için dosyayı indirip Drive’daki ortak klasöre yükleyin.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="export">Kayıt dosyasını indir (.json)</button>
+    <label class="btn ghost" style="margin:0;cursor:pointer">Yedekten geri yükle<input type="file" accept=".json" hidden data-act="restore"></label></div></div>
+  <form class="card" data-form="pw"><h3>Şifre değiştir</h3><label>Mevcut şifre</label><input type="password" name="old" required><label>Yeni şifre (en az 6)</label><input type="password" name="n1" minlength="6" required>
+    <button class="btn" style="margin-top:16px" type="submit">Şifreyi güncelle</button></form>
+  ${adm?`<form class="card" data-form="set"><h3>Çalışma süresi</h3><label>Günlük net çalışma süresi (dk)</label><input type="number" name="mesai" min="60" max="720" value="${set.mesai}">
+    <p class="note">Yemek/mola düşüldükten sonraki net süre. Varsayılan 450 dk (7 sa 30 dk). Verimlilik hesabının paydasıdır.</p><button class="btn" type="submit">Kaydet</button></form>
+  <div class="card"><h3>Bu cihazdaki kullanıcılar</h3><table><tbody>${users.map(u=>`<tr><td><b>${esc(u.name)}</b><br><span class="note">@${esc(u.username)} · ${u.role==='yonetici'?'Yönetici':'Personel'}</span></td><td class="r" style="white-space:nowrap">
+    <button class="btn ghost sm" data-act="resetpw" data-v="${esc(u.username)}">Şifre sıfırla</button>${u.username!==S.user.username?` <button class="btn danger sm" data-act="deluser" data-v="${esc(u.username)}">Sil</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:''}
+  </div>`;
+}
+
+/* ---------- Dışa / içe aktarma ---------- */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function csvOf(rows){return'﻿'+rows.map(r=>r.map(v=>{v=String(v==null?'':v);return/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(';')).join('\r\n')}
+function recRows(name,recs){return recs.sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[name,trDate(x.date),x.job,x.mat,x.qty,x.std,x.total,x.actualMin??'',x.waitMin||0,x.waitReason||'Yok',x.status||'Tamamlandı',x.quality||'Değerlendirilmedi',x.rework||'Hayır',x.priority||'Normal',x.dueDate||'',x.note])}
+const CSVH=['Personel','Tarih','İş grubu','Malzeme','Miktar','Birim standart süre (dk)','Toplam standart süre (dk)','Gerçek süre (dk)','Bekleme süresi (dk)','Bekleme nedeni','Durum','Kalite sonucu','Tekrar işlem','Öncelik','Hedef tarih','Not'];
+function cleanRec(r,uname){
+  if(!r||typeof r!=='object')return null;
+  const date=String(r.date||''),qty=Number(r.qty),std=Number(r.std);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!(qty>0)||!(std>=0)||!r.job||!r.mat)return null;
+  return{id:String(r.id||rid()).slice(0,40),u:uname,date,job:String(r.job).slice(0,120),mat:String(r.mat).slice(0,80),qty,std,total:qty*std,note:String(r.note||'').slice(0,500),actualMin:r.actualMin===''||r.actualMin==null?'':Math.max(0,Number(r.actualMin)||0),waitMin:Math.max(0,Number(r.waitMin)||0),waitReason:String(r.waitReason||'Yok').slice(0,100),status:String(r.status||'Tamamlandı'),quality:String(r.quality||'Değerlendirilmedi'),rework:String(r.rework||'Hayır'),priority:String(r.priority||'Normal'),dueDate:String(r.dueDate||''),ts:Number(r.ts)||0};
+}
+async function readJson(file){try{return JSON.parse(await file.text())}catch(e){return null}}
+async function importFiles(files){
+  const team=getTeam();let ok=0,bad=0,recs=0;
+  for(const f of files){
+    const j=await readJson(f);
+    if(!j||j.app!=='kkl-performans'||!j.user||!j.user.username||!Array.isArray(j.records)){bad++;continue}
+    const k=String(j.user.username).toLowerCase().slice(0,30);
+    const t=team[k]||(team[k]={name:String(j.user.name||k).slice(0,60),recs:{}});
+    t.name=String(j.user.name||t.name).slice(0,60);
+    j.records.forEach(r=>{const c=cleanRec(r,k);if(c){t.recs[c.id]=c;recs++}});ok++;
+  }
+  store.set('kklp_team',team);render();
+  toast(`${ok} dosya alındı (${recs} kayıt)${bad?`, ${bad} dosya geçersiz`:''}.`);
+}
+
+/* ---------- Olaylar ---------- */
+let tt;function toast(m){clearTimeout(tt);let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=m;tt=setTimeout(()=>t.remove(),3200)}
+document.addEventListener('submit',e=>{
+  const f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  if(k==='login')doLogin(f);else if(k==='reg')doReg(f);else if(k==='add')doAdd(f);
+  else if(k==='set'){const v=parseInt(f.mesai.value);if(v>=60&&v<=720){store.set('kklp_set',{mesai:v});toast('Kaydedildi.');render()}}
+  else if(k==='pw'){const u=S.user;if(hashPw(f.old.value,u.salt)!==u.hash)return toast('Mevcut şifre hatalı.');
+    const salt=rid(),us=getUsers().map(x=>x.username===u.username?(S.user=Object.assign({},x,{salt,hash:hashPw(f.n1.value,salt)})):x);store.set('kklp_users',us);f.reset();toast('Şifre güncellendi.')}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.hasAttribute('data-draft')){S.draft[t.name]=t.value;updPreview();if(t.name==='date'&&S.tab==='ekle'&&t.value)render()}
+  if(t.dataset.cat){const[m,j]=t.dataset.cat.split('.').map(Number);S.catDraft.t[m][j]=Math.max(0,parseFloat(t.value)||0);t.classList.toggle('zero',!S.catDraft.t[m][j])}
+});
+document.addEventListener('change',async e=>{
+  const t=e.target,a=t.dataset.act;
+  if(t.type==='date'&&(a==='from'||a==='to'||a==='tfrom'||a==='tto')){S[a]=t.value;render()}
+  if(a==='import'){await importFiles([...t.files]);t.value=''}
+  if(a==='restore'||a==='catimp'){
+    const j=await readJson(t.files[0]);t.value='';
+    if(a==='catimp'){if(j&&j.app==='kkl-katalog'&&Array.isArray(j.jobs)&&Array.isArray(j.mats)&&Array.isArray(j.t)){S.catDraft=j.cat||{ver:j.ver,jobs:j.jobs,mats:j.mats,t:j.t};render();toast('Katalog yüklendi. Kaydet’e basın.')}else toast('Geçersiz katalog dosyası.');return}
+    if(!j||j.app!=='kkl-performans'||String(j.user&&j.user.username).toLowerCase()!==S.user.username)return toast('Bu dosya bu hesaba ait değil.');
+    const recs=getRec(S.user.username),ids=new Set(recs.map(x=>x.id));let n=0;
+    (j.records||[]).forEach(r=>{const c=cleanRec(r,S.user.username);if(c&&!ids.has(c.id)){recs.push(c);n++}});setRec(S.user.username,recs);toast(n+' kayıt geri yüklendi.');
+  }
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.tagName==='INPUT')return;const a=b.dataset.act,v=b.dataset.v;
+  if(a==='mode'){S.mode=v;S.err='';render()}
+  else if(a==='logout'){S.user=null;sess.set(null);S.mode='login';render()}
+  else if(a==='tab'){S.tab=v;if(v!=='katalog')S.catDraft=null;render()}
+  else if(a==='period'){S.period=v;render()}
+  else if(a==='tperiod'){S.tperiod=v;render()}
+  else if(a==='edit'){const x=getRec(S.user.username).find(r=>r.id===v);if(x){S.edit=v;S.draft={date:x.date,job:x.job,mat:x.mat,qty:String(x.qty),note:x.note||'',actualMin:x.actualMin??'',waitMin:String(x.waitMin||0),waitReason:x.waitReason||'Yok',status:x.status||'Tamamlandı',quality:x.quality||'Değerlendirilmedi',rework:x.rework||'Hayır',priority:x.priority||'Normal',dueDate:x.dueDate||''};S.tab='ekle';render()}}
+  else if(a==='canceledit'){S.edit=null;S.draft={date:today(),job:'',mat:'',qty:'1',note:'',actualMin:'',waitMin:'0',waitReason:'Yok',status:'Tamamlandı',quality:'Uygun',rework:'Hayır',priority:'Normal',dueDate:''};render()}
+  else if(a==='del'){if(confirm('Bu kayıt silinsin mi?')){setRec(S.user.username,getRec(S.user.username).filter(x=>x.id!==v));render();toast('Kayıt silindi.')}}
+  else if(a==='csv'){download('KKL_kayitlarim_'+today()+'.csv',csvOf([CSVH,...recRows(S.user.name,getRec(S.user.username))]),'text/csv')}
+  else if(a==='teamcsv'){const m=teamData(),r=range(S.tperiod);let rows=[CSVH];Object.values(m).forEach(p=>rows=rows.concat(recRows(p.name,Object.values(p.recs).filter(x=>x.date>=r[0]&&x.date<=r[1]))));download('KKL_ekip_'+today()+'.csv',csvOf(rows),'text/csv')}
+  else if(a==='reportcsv'){const m=teamData(),r=range(S.tperiod);let rows=[CSVH];Object.values(m).forEach(p=>rows=rows.concat(recRows(p.name,Object.values(p.recs).filter(x=>x.date>=r[0]&&x.date<=r[1]))));download('KKL_detayli_rapor_'+today()+'.csv',csvOf(rows),'text/csv');toast('Detaylı rapor indirildi.')}
+  else if(a==='export'){const u=S.user;download(`KKL_${u.username}_${today()}.json`,JSON.stringify({app:'kkl-performans',v:1,exportedAt:new Date().toISOString(),user:{username:u.username,name:u.name},records:getRec(u.username)}),'application/json');toast('Dosya indirildi. Drive’daki ortak klasöre yükleyin.')}
+  else if(a==='resetpw'){const p=prompt('Yeni şifre (en az 6 karakter):');if(p&&p.length>=6){const salt=rid();store.set('kklp_users',getUsers().map(x=>x.username===v?Object.assign({},x,{salt,hash:hashPw(p,salt)}):x));toast('Şifre sıfırlandı.')}else if(p)toast('Şifre çok kısa.')}
+  else if(a==='deluser'){if(confirm('Kullanıcı hesabı silinsin mi? (Kayıtları bu cihazda kalır.)')){store.set('kklp_users',getUsers().filter(x=>x.username!==v));render()}}
+  else if(a==='addmat'){const n=(prompt('Yeni malzeme grubu adı:')||'').trim();if(n&&!S.catDraft.mats.includes(n)){S.catDraft.mats.push(n);S.catDraft.t.push(S.catDraft.jobs.map(()=>0));render()}}
+  else if(a==='addjob'){const n=(prompt('Yeni iş grubu adı:')||'').trim();if(n&&!S.catDraft.jobs.includes(n)){S.catDraft.jobs.push(n);S.catDraft.t.forEach(r=>r.push(0));render()}}
+  else if(a==='delmat'){if(confirm('Malzeme satırı silinsin mi?')){S.catDraft.mats.splice(+v,1);S.catDraft.t.splice(+v,1);render()}}
+  else if(a==='deljob'){if(confirm('İş grubu sütunu silinsin mi?')){S.catDraft.jobs.splice(+v,1);S.catDraft.t.forEach(r=>r.splice(+v,1));render()}}
+  else if(a==='catsave'){S.catDraft.ver='v'+Date.now();store.set('kklp_cat',S.catDraft);S.catDraft=null;render();toast('Katalog kaydedildi.')}
+  else if(a==='catexp'){const c=S.catDraft;download('KKL_sure_katalogu_'+today()+'.json',JSON.stringify({app:'kkl-katalog',ver:c.ver,jobs:c.jobs,mats:c.mats,t:c.t}),'application/json')}
+});
+
+/* ---------- Çizim ---------- */
+function render(){
+  const a=$('#app');
+  a.innerHTML=S.user?viewApp():viewLogin();
+  if(S.user&&S.tab==='ekle')updPreview();
+  if(!S.user){const f=$(S.lu?'input[name=pw]':'input[name=username]');if(f)f.focus()}
+}
+(function init(){
+  const un=sess.get();if(un){const u=getUsers().find(x=>x.username===un);if(u)S.user=u}
+  if(!S.user&&getUsers().length===0)S.mode='reg';
+  render();
+})();
+</script>
+</body>
+</html>
